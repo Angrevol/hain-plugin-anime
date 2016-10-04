@@ -1,10 +1,13 @@
 {
   "name": "hain-plugin-anime",
-  "version": "0.6",
+  "version": "1.0",
   "description": "Get info on Animes",
   "main": "index.js",
   "scripts": {},
-  "repository": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/angrevol/hain-plugin-anime.git"
+  },
   "author": "Angrevol",
   "license": "MIT",
   "keywords": [
