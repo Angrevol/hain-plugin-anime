@@ -1,0 +1,25 @@
+{
+  "name": "hain-plugin-anime",
+  "version": "0.6",
+  "description": "Get info on Animes",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {},
+  "author": "Angrevol",
+  "license": "MIT",
+  "keywords": [
+    "hain-0.5.0"
+  ],
+  "dependencies": {
+    "got": "latest",
+	"cheerio": "latest",
+	"fs": "latest",
+	"path": "latest"
+  },
+  "hain": {
+    "prefix": "/anime",
+    "usage": "/anime something",
+    "icon": "./anime.png",
+    "redirect": "/anime "
+  }
+}
