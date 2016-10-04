@@ -1,6 +1,5 @@
 # hain-plugin-anime
-
-a plugin to see informations about anime in `Hain`
+A plugin to see informations about anime in `Hain`
 
 ## Installation
 
