@@ -110,7 +110,7 @@ module.exports = (PluginContext) => {
 			var airdate = $(info.html().replace(/^[\s\S]*?Aired:\s*?([\S\s]+?)<\/div>[\s\S]+/i, "$1").trim()).text();
 			var genre = $(info.html().replace(/^[\s\S]*?Genres:\s*?([\S\s]+?)<\/div>[\s\S]+/i, "$1").trim()).text();
 			var desc = $(response.body).find("span[itemprop='description']").text();
-			var rank = $("div[data-id='info2']", info).text().replace(/[\S\s]*?#(\d+)[\S\s]*/i, "$1");
+			var rank = $("div[data-id='info2']", info).text().replace(/[\S\s]*?(?:#?(N\/A|\d+))[\S\s]*/i, "$1");
 			var preview = html.replace("%src%", img);
 			preview = preview.replace("%type%", type);
 			preview = preview.replace("%title%", title);
