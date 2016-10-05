@@ -113,7 +113,7 @@ module.exports = (PluginContext) => {
 			preview = preview.replace("%type%", jsdata.payload.media_type);
 			preview = preview.replace("%title%", jsdata.name);
 			preview = preview.replace("%episodes%", eps);
-			preview = preview.replace("%airdate%", jsdata.aired);
+			preview = preview.replace("%airdate%", jsdata.payload.aired);
 			preview = preview.replace("%studio%", studio);
 			preview = preview.replace("%genre%", genre);
 			preview = preview.replace("%rank%", rank);
