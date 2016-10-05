@@ -65,6 +65,9 @@ module.exports = (PluginContext) => {
 				while (i < results.length) {
 					var data = results[i];
 					var score = data.payload.score;
+					var airing = "";
+					if (data.payload.status == "Currently Airing")
+						airing = " - Airing";
 					if (score != "N/A")
 						score += "/10";
 					res_temp.push({
@@ -72,7 +75,7 @@ module.exports = (PluginContext) => {
 					  id: JSON.stringify(data),
 					  payload: "open",
 					  title: data.name,
-					  desc: data.payload.start_year+" | "+score+" | "+data.payload.media_type,
+					  desc: data.payload.start_year+" | "+score+" | "+data.payload.media_type+airing,
 					  preview: true
 					});
 					i++;
