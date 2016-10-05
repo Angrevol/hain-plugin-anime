@@ -31,19 +31,16 @@ module.exports = (PluginContext) => {
 			return 0;
 		}
 		do_search = 0;
-		if (query_trim.length <= 2)
+		if (query_trim.length == 0)
 		{
-			var title = `\"${query_trim}\" is too short`;
-			if (query_trim.length == 0)
-				title = "Please enter something";
 			res.add({
-				title: title,
-				desc: "The search query needs to be at least 3 characters long",
+				title: "Please enter something",
+				desc: "Must enter at least 1 character to search.",
 				icon: '#fa fa-times'
 			});
 			return 0;
 		}
-		var url = `https://myanimelist.net/anime.php?q=${query_trim}`;
+		var url = `https://myanimelist.net/search/prefix.json?type=anime&keyword=${query_trim}&v=1`;
 		res.add({
 			id: '__temp',
 			title: 'fetching...',
@@ -51,9 +48,8 @@ module.exports = (PluginContext) => {
 			icon: '#fa fa-circle-o-notch fa-spin'
 		});
 		got(url).then(response => {
-			var table = $(".js-categories-seasonal table", response.body);
-			var results = $(table).find("tr").toArray();
-			results.shift();
+			var results = JSON.parse(response.body);
+			results = results.categories[0].items;
 			if (results.length == 0)
 			{
 				res.remove('__temp');
@@ -65,17 +61,22 @@ module.exports = (PluginContext) => {
 			else
 			{
 				var res_temp = [];
-				$(results).each(function (index, element) {
-					var data = $(this).find("td").toArray();
+				var i = 0;
+				while (i < results.length) {
+					var data = results[i];
+					var score = data.payload.score;
+					if (score != "N/A")
+						score += "/10";
 					res_temp.push({
-					  icon: $(data[0]).find("img").attr("data-src"),
-					  id: $(data[1]).find("a").attr("href"),
+					  icon: data.thumbnail_url,
+					  id: JSON.stringify(data),
 					  payload: "open",
-					  title: $(data[1]).find("a strong").text(),
-					  desc: $(data[1]).find(".pt4").text(),
+					  title: data.name,
+					  desc: data.payload.start_year+" | "+score+" | "+data.payload.media_type,
 					  preview: true
 					});
-				});
+					i++;
+				}
 				res.remove('__temp');
 				res.add(res_temp);
 			}
@@ -87,7 +88,7 @@ module.exports = (PluginContext) => {
 	function execute(id, payload) {
 		if (payload == "open")
 		{
-			shell.openExternal(id);
+			shell.openExternal(JSON.parse(id).url);
 			return 1;
 		}
 		if (payload == "search")
@@ -100,22 +101,19 @@ module.exports = (PluginContext) => {
 
 	function renderPreview(id, payload, render) {
 		render('<html><head><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous"><style>#center {text-align: center;top: calc(50% - 40px);left: calc(50% - 40px);position: relative;}</style></head><body><i id="center" class="fa fa-circle-o-notch fa-spin fa-5x" aria-hidden="true"></i></body></html>');
-		got(id).then(response => {
+		var jsdata = JSON.parse(id);
+		got(jsdata.url).then(response => {
 			var info = $(response.body).find(".borderClass");
-			var title = $(response.body).find(".h1").text()
-			var img = $(info).find("a>img.ac").attr("src");
-			var type = info.text().replace(/^[\s\S]*?Type:\s*?(\S+)[\s\S]*$/i, "$1");
 			var eps = info.text().replace(/^[\s\S]*?Episodes:\s*?(\S+)[\s\S]*$/i, "$1");
 			var studio = $(info.html().replace(/^[\s\S]*?Studios:\s*?([\S\s]+?)<\/div>[\s\S]+/i, "$1").trim()).text();
-			var airdate = $(info.html().replace(/^[\s\S]*?Aired:\s*?([\S\s]+?)<\/div>[\s\S]+/i, "$1").trim()).text();
 			var genre = $(info.html().replace(/^[\s\S]*?Genres:\s*?([\S\s]+?)<\/div>[\s\S]+/i, "$1").trim()).text();
 			var desc = $(response.body).find("span[itemprop='description']").text();
 			var rank = $("div[data-id='info2']", info).html().replace(/[\S\s]*?(?:#?(N\/A|\d+))[\S\s]*/i, "$1");
-			var preview = html.replace("%src%", img);
-			preview = preview.replace("%type%", type);
-			preview = preview.replace("%title%", title);
+			var preview = html.replace("%src%", jsdata.image_url);
+			preview = preview.replace("%type%", jsdata.payload.media_type);
+			preview = preview.replace("%title%", jsdata.name);
 			preview = preview.replace("%episodes%", eps);
-			preview = preview.replace("%airdate%", airdate);
+			preview = preview.replace("%airdate%", jsdata.aired);
 			preview = preview.replace("%studio%", studio);
 			preview = preview.replace("%genre%", genre);
 			preview = preview.replace("%rank%", rank);
