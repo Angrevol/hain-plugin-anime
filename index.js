@@ -20,6 +20,7 @@ module.exports = (PluginContext) => {
 	}
 	
 	function search(query, res) {
+		res_temp = [];
 		var query_trim = query.trim();
 		if (do_search == 0)
 		{
@@ -62,7 +63,6 @@ module.exports = (PluginContext) => {
 			}
 			else
 			{
-				res_temp = [];
 				var i = 0;
 				while (i < results.length) {
 					var data = results[i];
