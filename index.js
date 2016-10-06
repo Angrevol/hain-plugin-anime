@@ -9,11 +9,11 @@ const pjson = require('./package.json');
 module.exports = (PluginContext) => {
 	const shell = PluginContext.shell;
 	const app = PluginContext.app;
+	const prefix = pjson.hain.prefix;
 	var html = "";
 	var do_search = 0;
-	var prefix = pjson.hain.prefix;
 	var render_id = "";
-	var res_temp = []
+	var res_temp = [];
 	
 	function startup() {
 		html = fs.readFileSync(path.join(__dirname, 'preview.html'), 'utf8');
@@ -62,6 +62,7 @@ module.exports = (PluginContext) => {
 			}
 			else
 			{
+				res_temp = [];
 				var i = 0;
 				while (i < results.length) {
 					var data = results[i];
