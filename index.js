@@ -12,6 +12,8 @@ module.exports = (PluginContext) => {
 	var html = "";
 	var do_search = 0;
 	var prefix = pjson.hain.prefix;
+	var render_id = "";
+	var res_temp = []
 	
 	function startup() {
 		html = fs.readFileSync(path.join(__dirname, 'preview.html'), 'utf8');
@@ -60,7 +62,6 @@ module.exports = (PluginContext) => {
 			}
 			else
 			{
-				var res_temp = [];
 				var i = 0;
 				while (i < results.length) {
 					var data = results[i];
@@ -71,19 +72,19 @@ module.exports = (PluginContext) => {
 					if (score != "N/A")
 						score += "/10";
 					res_temp.push({
-					  icon: data.thumbnail_url,
-					  id: JSON.stringify(data),
-					  payload: "open",
-					  title: data.name,
-					  desc: data.payload.start_year+" | "+score+" | "+data.payload.media_type+airing,
-					  preview: true
+						icon: data.thumbnail_url,
+						id: JSON.stringify(data),
+						payload: "open",
+						title: data.name,
+						desc: data.payload.start_year+" | "+score+" | "+data.payload.media_type+airing,
+						preview: true
 					});
 					i++;
 				}
 				res.remove('__temp');
 				res.add(res_temp);
 			}
-			return 1;
+			return 0;
 		});
 		return 0;
 	}
@@ -91,18 +92,30 @@ module.exports = (PluginContext) => {
 	function execute(id, payload) {
 		if (payload == "open")
 		{
-			shell.openExternal(JSON.parse(id).url);
-			return 1;
+			if (id == render_id)
+				shell.openExternal(JSON.parse(id).url);
+			else {
+				var i = 0;
+				while (i < res_temp.length) {
+					if (id == res_temp[i].id) {
+						app.setSelectionIndex(i);
+						return 0;
+					}
+					i++;
+				}
+			}
+			return 0;
 		}
 		if (payload == "search")
 		{
 			do_search = 1;
-			app.setQuery(prefix+" "+id)
-			return 1;
+			app.setQuery(prefix+" "+id);
+			return 0;
 		}
 	}
 
 	function renderPreview(id, payload, render) {
+		render_id = id;
 		render('<html><head><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous"><style>#center {text-align: center;top: calc(50% - 40px);left: calc(50% - 40px);position: relative;}</style></head><body><i id="center" class="fa fa-circle-o-notch fa-spin fa-5x" aria-hidden="true"></i></body></html>');
 		var jsdata = JSON.parse(id);
 		got(jsdata.url).then(response => {
