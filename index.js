@@ -13,14 +13,14 @@ module.exports = (PluginContext) => {
 	var html = "";
 	var do_search = 0;
 	var render_id = "";
-	var res_temp = [];
+	var anime_ids = {};
 	
 	function startup() {
 		html = fs.readFileSync(path.join(__dirname, 'preview.html'), 'utf8');
 	}
 	
 	function search(query, res) {
-		res_temp = [];
+		anime_ids = {};
 		var query_trim = query.trim();
 		if (do_search == 0)
 		{
@@ -63,11 +63,13 @@ module.exports = (PluginContext) => {
 			}
 			else
 			{
+				var res_temp = [];
 				var i = 0;
 				while (i < results.length) {
 					var data = results[i];
 					var score = data.payload.score;
 					var airing = "";
+					anime_ids[parseInt(data.id)] = i;
 					if (data.payload.status == "Currently Airing")
 						airing = " - Airing";
 					if (score != "N/A")
@@ -93,17 +95,12 @@ module.exports = (PluginContext) => {
 	function execute(id, payload) {
 		if (payload == "open")
 		{
-			if (id == render_id)
-				shell.openExternal(JSON.parse(id).url);
+			var jsdata = JSON.parse(id);
+			if (jsdata.id == render_id)
+				shell.openExternal(jsdata.url);
 			else {
-				var i = 0;
-				while (i < res_temp.length) {
-					if (id == res_temp[i].id) {
-						app.setSelectionIndex(i);
-						return 0;
-					}
-					i++;
-				}
+				app.setSelectionIndex(anime_ids[parseInt(jsdata.id)]);
+				return 0;
 			}
 			return 0;
 		}
@@ -116,9 +113,9 @@ module.exports = (PluginContext) => {
 	}
 
 	function renderPreview(id, payload, render) {
-		render_id = id;
-		render('<html><head><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous"><style>#center {text-align: center;top: calc(50% - 40px);left: calc(50% - 40px);position: relative;}</style></head><body><i id="center" class="fa fa-circle-o-notch fa-spin fa-5x" aria-hidden="true"></i></body></html>');
 		var jsdata = JSON.parse(id);
+		render_id = parseInt(jsdata.id);
+		render('<html><head><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous"><style>#center {text-align: center;top: calc(50% - 40px);left: calc(50% - 40px);position: relative;}</style></head><body><i id="center" class="fa fa-circle-o-notch fa-spin fa-5x" aria-hidden="true"></i></body></html>');
 		got(jsdata.url).then(response => {
 			var info = $(response.body).find(".borderClass");
 			var eps = info.text().replace(/^[\s\S]*?Episodes:\s*?(\S+)[\s\S]*$/i, "$1");
